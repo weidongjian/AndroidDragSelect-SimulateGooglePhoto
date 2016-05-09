@@ -334,6 +334,7 @@ public class SelectItemAnimator extends SimpleItemAnimator {
             mChangeAnimations.add(changeInfo.oldHolder);
             oldViewAnim.translationX(changeInfo.toX - changeInfo.fromX);
             oldViewAnim.translationY(changeInfo.toY - changeInfo.fromY);
+            //对于本来是选中的，执行放大的动画，对于不是选择的，执行缩放的动画
             boolean isScale = ViewCompat.getScaleX(view) < 0.9f;
             float scaleFactor = isScale ? 1f : 0.8f;
             oldViewAnim.scaleX(scaleFactor)

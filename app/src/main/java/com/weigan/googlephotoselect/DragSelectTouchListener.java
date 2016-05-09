@@ -71,7 +71,6 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
         switch (action) {
             case MotionEvent.ACTION_POINTER_DOWN:
                 Log.d("debug", "onInterceptTouchEvent ACTION_POINTER_DOWN");
-                break;
             case MotionEvent.ACTION_DOWN:
                 Log.d("debug", "onInterceptTouchEvent ACTION_DOWN");
                 reset();
@@ -90,16 +89,16 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
         switch (action) {
             case MotionEvent.ACTION_MOVE:
                 if (!inTopSpot && !inBottomSpot) {
+                    //更新滑动选择区域
                     updateSelectedRange(rv, e);
                 }
+                //在顶部或者底部触发自动滑动
                 processAutoScroll(e);
                 break;
             case MotionEvent.ACTION_CANCEL:
-                Log.d("debug", "ACTION_POINTER_UP");
             case MotionEvent.ACTION_UP:
-                Log.d("debug", "ACTION_UP");
             case MotionEvent.ACTION_POINTER_UP:
-                Log.d("debug", "ACTION_POINTER_UP");
+                //结束滑动选择，初始化各状态值
                 reset();
                 break;
         }
