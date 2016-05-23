@@ -105,7 +105,7 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
         initScroller(recyclerView.getContext());
         if (scroller.isFinished()) {
             recyclerView.removeCallbacks(scrollRun);
-            scroller.startScroll(0, scroller.getCurrY(), 0, 5000, 10000);
+            scroller.startScroll(0, scroller.getCurrY(), 0, 5000, 100000);
             ViewCompat.postOnAnimation(recyclerView, scrollRun);
         }
     }
