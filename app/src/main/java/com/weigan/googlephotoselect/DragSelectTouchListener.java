@@ -6,12 +6,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.ScrollerCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
-import android.widget.Scroller;
 
 /**
  * Created by Administrator on 2016/5/7.
@@ -46,7 +46,7 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
 
     private int lastStart, lastEnd;
 
-    private Scroller scroller;
+    private ScrollerCompat scroller;
 
     private Runnable scrollRunnable = new Runnable() {
         @Override
@@ -112,14 +112,14 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
 
     private void initScroller(Context context) {
         if (scroller == null) {
-            scroller = new Scroller(context, new LinearInterpolator());
+            scroller = ScrollerCompat.create(context, new LinearInterpolator());
         }
     }
 
     public void stopAutoScroll() {
         if (scroller != null && !scroller.isFinished()) {
             recyclerView.removeCallbacks(scrollRun);
-            scroller.forceFinished(true);
+            scroller.abortAnimation();
         }
     }
 
