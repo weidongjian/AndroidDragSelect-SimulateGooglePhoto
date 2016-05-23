@@ -84,6 +84,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     }
 
     public void selectRangeChange(int start, int end, boolean isSelected) {
+        if (start < 0 || end >= items.size()) {
+            return;
+        }
         if (isSelected) {
             dataSelect(start, end);
         } else {

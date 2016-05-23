@@ -1,13 +1,17 @@
 package com.weigan.googlephotoselect;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
+import android.widget.Scroller;
 
 /**
  * Created by Administrator on 2016/5/7.
@@ -35,9 +39,14 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
 
     private float lastX, lastY;
 
-    private static final int MAX_SCROLL_DISTANCE = 28;
+    private static final int MAX_SCROLL_DISTANCE = 16;
+
+    //这个数越大，滚动的速度增加越慢
+    private static final int SCROLL_FECTOR = 6;
 
     private int lastStart, lastEnd;
+
+    private Scroller scroller;
 
     private Runnable scrollRunnable = new Runnable() {
         @Override
@@ -89,6 +98,42 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
         return true;
     }
 
+    public void startAutoScroll() {
+        if (recyclerView == null) {
+            return;
+        }
+        initScroller(recyclerView.getContext());
+        if (scroller.isFinished()) {
+            recyclerView.removeCallbacks(scrollRun);
+            scroller.startScroll(0, scroller.getCurrY(), 0, 5000, 10000);
+            ViewCompat.postOnAnimation(recyclerView, scrollRun);
+        }
+    }
+
+    private void initScroller(Context context) {
+        if (scroller == null) {
+            scroller = new Scroller(context, new LinearInterpolator());
+        }
+    }
+
+    public void stopAutoScroll() {
+        if (scroller != null && !scroller.isFinished()) {
+            recyclerView.removeCallbacks(scrollRun);
+            scroller.forceFinished(true);
+        }
+    }
+
+    private Runnable scrollRun = new Runnable() {
+        @Override
+        public void run() {
+            if (scroller != null && scroller.computeScrollOffset()) {
+                Log.d("weigan", "scrollRun called");
+                scrollBy(scrollDistance);
+                ViewCompat.postOnAnimation(recyclerView, scrollRun);
+            }
+        }
+    };
+
     @Override
     public void onTouchEvent(RecyclerView rv, MotionEvent e) {
         if (!isActive) {
@@ -132,30 +177,32 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
     private void processAutoScroll(MotionEvent event) {
         int y = (int) event.getY();
         if (y < mTopBound) {
-
+            lastX = event.getX();
+            lastY = event.getY();
+            scrollDistance = -(mTopBound - y) / SCROLL_FECTOR;
             if (!inTopSpot) {
                 inTopSpot = true;
-                autoScrollHandler.removeCallbacks(scrollRunnable);
-                autoScrollHandler.postDelayed(scrollRunnable, DELAY);
+//                autoScrollHandler.removeCallbacks(scrollRunnable);
+//                autoScrollHandler.postDelayed(scrollRunnable, DELAY);
+                startAutoScroll();
             }
+        }else if (y > mBottomBound) {
             lastX = event.getX();
             lastY = event.getY();
-            scrollDistance = -(mTopBound - y) / 3;
-        }else if (y > mBottomBound) {
+            scrollDistance = (y - mBottomBound) / SCROLL_FECTOR;
             if (!inBottomSpot) {
                 inBottomSpot = true;
-                autoScrollHandler.removeCallbacks(scrollRunnable);
-                autoScrollHandler.postDelayed(scrollRunnable, DELAY);
+//                autoScrollHandler.removeCallbacks(scrollRunnable);
+//                autoScrollHandler.postDelayed(scrollRunnable, DELAY);
+                startAutoScroll();
             }
-            lastX = event.getX();
-            lastY = event.getY();
-            scrollDistance = (y - mBottomBound) / 3;
         } else {
-            autoScrollHandler.removeCallbacks(scrollRunnable);
+//            autoScrollHandler.removeCallbacks(scrollRunnable);
             inBottomSpot = false;
             inTopSpot = false;
             lastX = Float.MIN_VALUE;
             lastY = Float.MIN_VALUE;
+            stopAutoScroll();
         }
     }
 
@@ -205,6 +252,7 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
         inBottomSpot = false;
         lastX = Float.MIN_VALUE;
         lastY = Float.MIN_VALUE;
+        stopAutoScroll();
     }
 
     @Override
