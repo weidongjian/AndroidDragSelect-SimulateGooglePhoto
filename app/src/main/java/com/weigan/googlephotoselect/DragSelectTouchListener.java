@@ -76,9 +76,9 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
         int action = MotionEventCompat.getActionMasked(e);
         switch (action) {
             case MotionEvent.ACTION_POINTER_DOWN:
-                Log.d("debug", "onInterceptTouchEvent ACTION_POINTER_DOWN");
+                Log.d("weigan", "onInterceptTouchEvent ACTION_POINTER_DOWN");
             case MotionEvent.ACTION_DOWN:
-                Log.d("debug", "onInterceptTouchEvent ACTION_DOWN");
+                Log.d("weigan", "onInterceptTouchEvent ACTION_DOWN");
                 reset();
                 break;
         }
@@ -91,6 +91,9 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
 
     @Override
     public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+        if (!isActive) {
+            return;
+        }
         int action = MotionEventCompat.getActionMasked(e);
         switch (action) {
             case MotionEvent.ACTION_MOVE:
@@ -177,7 +180,7 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
             if (newStart > lastStart) {
                 selectListener.onSelectChange(lastStart, newStart - 1, false);
             } else if (newStart < lastStart) {
-                selectListener.onSelectChange(newStart, lastStart - 1, false);
+                selectListener.onSelectChange(newStart, lastStart - 1, true);
             }
 
             if (newEnd > lastEnd) {
