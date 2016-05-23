@@ -27,20 +27,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     private View.OnLongClickListener longClickListener;
     private View.OnClickListener clickListener;
 
-    private int lastStart, lastEnd;
-
     public MyAdapter(Context context) {
         inflater = LayoutInflater.from(context);
         items = new ArrayList<>();
         for (int i = 0; i < ITEM_COUNT; i++) {
             items.add(new DataModel(false, i));
         }
-        resetStartAndEnd();
-    }
-
-    public void resetStartAndEnd() {
-        lastStart = RecyclerView.NO_POSITION;
-        lastEnd = RecyclerView.NO_POSITION;
     }
 
     @Override
@@ -91,36 +83,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         this.clickListener = clickListener;
     }
 
-    public void selectRangeChange(int start, int end) {
-        if (start == RecyclerView.NO_POSITION || end == RecyclerView.NO_POSITION) {
-            return;
-        }
-
-        int newStart, newEnd;
-        newStart = Math.min(start, end);
-        newEnd = Math.max(start, end);
-        if (lastStart == RecyclerView.NO_POSITION || lastEnd == RecyclerView.NO_POSITION) {
-            if (newEnd - newStart == 1) {
-                dataSelect(newEnd, newEnd);
-            } else {
-                dataSelect(newStart, newEnd);
-            }
+    public void selectRangeChange(int start, int end, boolean isSelected) {
+        if (isSelected) {
+            dataSelect(start, end);
         } else {
-            if (newStart > lastStart) {
-                dataUnselect(lastStart, newStart - 1);
-            } else if (newStart < lastStart) {
-                dataSelect(newStart, lastStart - 1);
-            }
-
-            if (newEnd > lastEnd) {
-                dataSelect(lastEnd + 1, newEnd);
-            } else if (newEnd < lastEnd) {
-                dataUnselect(newEnd + 1, lastEnd);
-            }
+            dataUnselect(start, end);
         }
-
-        lastStart = newStart;
-        lastEnd = newEnd;
     }
 
     public int getSelectedSize() {

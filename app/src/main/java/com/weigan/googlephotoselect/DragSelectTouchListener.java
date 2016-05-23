@@ -37,6 +37,8 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
 
     private static final int MAX_SCROLL_DISTANCE = 28;
 
+    private int lastStart, lastEnd;
+
     private Runnable scrollRunnable = new Runnable() {
         @Override
         public void run() {
@@ -53,9 +55,13 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
     }
 
     public interface onSelectListener{
-        void onSelect(int start, int end);
-
-        void reset();
+        /**
+         * 选择结果的回调
+         * @param start 开始的位置
+         * @param end 结束的位置
+         * @param isSelected 是否选中
+         */
+        void onSelectChange(int start, int end, boolean isSelected);
     };
 
     public DragSelectTouchListener() {
@@ -151,18 +157,46 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
     }
 
     private void notifySelectRangeChange() {
-        if (selectListener != null) {
-            selectListener.onSelect(start, end);
+        if (selectListener == null) {
+            return;
         }
+        if (start == RecyclerView.NO_POSITION || end == RecyclerView.NO_POSITION) {
+            return;
+        }
+
+        int newStart, newEnd;
+        newStart = Math.min(start, end);
+        newEnd = Math.max(start, end);
+        if (lastStart == RecyclerView.NO_POSITION || lastEnd == RecyclerView.NO_POSITION) {
+            if (newEnd - newStart == 1) {
+                selectListener.onSelectChange(newStart, newStart, true);
+            } else {
+                selectListener.onSelectChange(newStart, newEnd, true);
+            }
+        } else {
+            if (newStart > lastStart) {
+                selectListener.onSelectChange(lastStart, newStart - 1, false);
+            } else if (newStart < lastStart) {
+                selectListener.onSelectChange(newStart, lastStart - 1, false);
+            }
+
+            if (newEnd > lastEnd) {
+                selectListener.onSelectChange(lastEnd + 1, newEnd, true);
+            } else if (newEnd < lastEnd) {
+                selectListener.onSelectChange(newEnd + 1, lastEnd, false);
+            }
+        }
+
+        lastStart = newStart;
+        lastEnd = newEnd;
     }
 
     private void reset() {
         setIsActive(false);
         start = RecyclerView.NO_POSITION;
         end = RecyclerView.NO_POSITION;
-        if (selectListener != null) {
-            selectListener.reset();
-        }
+        lastStart = RecyclerView.NO_POSITION;
+        lastEnd = RecyclerView.NO_POSITION;
         autoScrollHandler.removeCallbacks(scrollRunnable);
         inTopSpot = false;
         inBottomSpot = false;
@@ -196,5 +230,7 @@ public class DragSelectTouchListener implements RecyclerView.OnItemTouchListener
         setIsActive(true);
         start = position;
         end = position;
+        lastStart = position;
+        lastEnd = position;
     }
 }

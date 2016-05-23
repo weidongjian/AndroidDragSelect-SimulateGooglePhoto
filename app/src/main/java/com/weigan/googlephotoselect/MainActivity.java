@@ -52,16 +52,10 @@ public class MainActivity extends AppCompatActivity {
 
         touchListener.setSelectListener(new DragSelectTouchListener.onSelectListener() {
             @Override
-            public void onSelect(int start, int end) {
+            public void onSelectChange(int start, int end, boolean isSelected) {
                 //选择的范围回调
-                adapter.selectRangeChange(start, end);
+                adapter.selectRangeChange(start, end, isSelected);
                 actionBar.setTitle(String.valueOf(adapter.getSelectedSize()) + " selected");
-            }
-
-            @Override
-            public void reset() {
-                //长按只触发一次滑动选择，结束后需要初始化相关的值
-                adapter.resetStartAndEnd();
             }
         });
 
